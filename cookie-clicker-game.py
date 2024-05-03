@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, math
 
 from pygame import image
 from pygame.constants import MOUSEBUTTONDOWN
@@ -11,13 +11,23 @@ class Upgrade :
     self.image = pygame.transform.scale(self.image,(50,50))
     self.rect = self.image.get_rect(topleft = position)
     self.cost = cost
-  def draw(self,screen):
+    self.cursors = []#list to store position of cursors
+  def draw(self,screen,cookie):  
     screen.blit(self.image,self.rect)
+    for pos in self.cursors:
+      screen.blit(self.image,pos)
+  
   def is_affordable(self,clicks):
     return clicks >= self.cost
   def purchase(self,cookie):
     if cookie.click_count >= self.cost :
       cookie.click_count -= self.cost
+      angle = len(self.cursors)*(360/12)
+      radian = math.radians(angle)
+      cursor_x = int(cookie.rect.centerx + math.cos(radian)*100)-self.image.get_rect().width//2
+      cursor_y = int(cookie.rect.centery + math.sin(radian)*100)-self.image.get_rect().height//2
+      self.cursors.append((cursor_x,cursor_y))
+      
       return True 
     return False
 
@@ -66,7 +76,7 @@ while running:
       cookie.reset_size()
   screen.blit(background_image,(0,0))
   cookie.draw(screen)
-  upgrade.draw(screen)
+  upgrade.draw(screen,cookie)
   font = pygame.font.Font(None,36)
   text = font.render(str(cookie.click_count),True,(0,0,0))
   screen.blit(text,(screen_width//5-10,screen_height//2+60))
@@ -78,3 +88,4 @@ while running:
   pygame.display.flip()
   clock.tick(60)
 pygame.quit()
+sys.exit()
